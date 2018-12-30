@@ -103,9 +103,8 @@ def correctPortEntry(var):
 
 
 # Socket connection and packet validation
-
-def sendOnePacket():
-	def packetWrapper():
+def sendServerPacket():
+	def packetServerWrapper():
 		writeToLog('STATE','Setting up socket...')	
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -114,10 +113,54 @@ def sendOnePacket():
 			s.settimeout(timeoutDuration)
 			ECHO_SERVER_ADDRESS = checkAddress()
 			ECHO_SERVER_PORT = checkPort()
-			connectionAttemptMessage = 'Trying to connect to ' + ECHO_SERVER_ADDRESS + ' at port ' + str(ECHO_SERVER_PORT) + ' with a timeout of ' + str(timeoutDuration) + ' seconds.'
+			connectionAttemptMessage = 'Hosting connection at ' + ECHO_SERVER_ADDRESS + ' at port ' + str(ECHO_SERVER_PORT) + ' with a timeout of ' + str(timeoutDuration) + ' seconds.'
+			writeToLog('STATE',connectionAttemptMessage)
+			listenPacketButton['state'] = 'disabled'
+			s.bind((ECHO_SERVER_ADDRESS, ECHO_SERVER_PORT))
+			s.listen()
+			acceptedConnection, acceptedAddress = s.accept()
+			connectionSuccessMessage = 'Connected to ' + str(acceptedAddress[0]) + ' at port ' + str(acceptedAddress[1])
+			writeToLog('STATE','Success!')
+			writeToLog('STATE',connectionSuccessMessage)
+			listenPacketButton.configure(text = 'Stop Packet', command=stopPacketSendLoop)
+			listenPacketButton['state'] = 'normal'
+			shouldLoop = True
+			while(shouldLoop):
+				receivedData = acceptedConnection.recv(1024).decode()
+				writeToLog('RECEIVE', receivedData)
+				packet = targetPacketValue.get()
+				writeToLog('SEND',packet)
+				acceptedConnection.sendall(bytes(packet,'utf-8'))
+				shouldLoop = bool(loopPackets.get())
+			writeToLog('STATE','Closing socket.')
+			listenPacketButton.configure(text = 'Listen for Packet', command=sendServerPacket)
+			s.close()
+		except RuntimeError:
+			pass # Message found in validation. Just to break as to not run connect
+		except socket.timeout:
+			listenPacketButton['state'] = 'normal'
+			writeToLog('ERROR', 'Connection has timed out. Verify you are physically connected to a device with the entered IP address.')
+		except socket.error as err: 
+			listenPacketButton['state'] = 'normal'
+			errorMessage = 'Socket creation failed with error ' + str(err) + '.'
+			writeToLog('ERROR', errorMessage)
+	t = threading.Thread(target=packetServerWrapper)
+	t.start()
+
+def sendClientPacket():
+	def packetClientWrapper():
+		writeToLog('STATE','Looking for socket...')	
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			# TODO custom timeout?
+			timeoutDuration = 5
+			s.settimeout(timeoutDuration)
+			ECHO_CLIENT_ADDRESS = checkAddress()
+			ECHO_CLIENT_PORT = checkPort()
+			connectionAttemptMessage = 'Trying to connect to ' + ECHO_CLIENT_ADDRESS + ' at port ' + str(ECHO_CLIENT_PORT) + ' with a timeout of ' + str(timeoutDuration) + ' seconds.'
 			writeToLog('STATE',connectionAttemptMessage)
 			sendPacketButton['state'] = 'disabled'
-			s.connect((ECHO_SERVER_ADDRESS, ECHO_SERVER_PORT))
+			s.connect((ECHO_CLIENT_ADDRESS, ECHO_CLIENT_PORT))
 			writeToLog('STATE','Success!')
 			sendPacketButton.configure(text = 'Stop Packet', command=stopPacketSendLoop)
 			sendPacketButton['state'] = 'normal'
@@ -130,7 +173,7 @@ def sendOnePacket():
 				writeToLog('RECEIVE', receivedData)
 				shouldLoop = bool(loopPackets.get())
 			writeToLog('STATE','Closing socket.')
-			sendPacketButton.configure(text = 'Send Packet', command=sendOnePacket)
+			sendPacketButton.configure(text = 'Send Packet', command=sendClientPacket)
 			s.close()
 		except RuntimeError:
 			pass # Message found in validation. Just to break as to not run connect
@@ -141,7 +184,7 @@ def sendOnePacket():
 			sendPacketButton['state'] = 'normal'
 			errorMessage = 'Socket creation failed with error ' + str(err) + '.'
 			writeToLog('ERROR', errorMessage)
-	t = threading.Thread(target=packetWrapper)
+	t = threading.Thread(target=packetClientWrapper)
 	t.start()
 
 def stopPacketSendLoop():
@@ -181,7 +224,7 @@ ipFrame = ttk.Frame(mainframe)
 ipFrame.grid(column=2, row=1, sticky=(N, W, E, S))
 
 logFrame = ttk.Frame(mainframe)
-logFrame.grid(column=2, row=5, sticky=(N, W, E, S))
+logFrame.grid(column=2, row=6, sticky=(N, W, E, S))
 
 # Labels
 ipLabel = ttk.Label(mainframe, text='Target IP:')
@@ -237,15 +280,17 @@ packetEntryTextBox = ttk.Entry(mainframe, width=7, textvariable=targetPacketValu
 packetEntryTextBox.grid(column=2, row=3, sticky=(W, E))
 
 # Loop Checkbox
-# TODO Unchecking box breaks loop (use command)
 loopPackets = IntVar()
 loopPacketCheckBox = ttk.Checkbutton(mainframe, text='Loop', variable=loopPackets)
-loopPacketCheckBox.grid(column=2, row=4, sticky=(W, E))
+loopPacketCheckBox.grid(column=2, row=5, sticky=(W, E))
 
 # Send Button
-sendPacketButton = ttk.Button(mainframe, text='Send Packet', command=sendOnePacket)
-sendPacketButton.grid(column=3, row=4, sticky=E)
+sendPacketButton = ttk.Button(mainframe, text='Send Packet', command=sendClientPacket)
+sendPacketButton.grid(column=3, row=5, sticky=E)
 
+# Client Button
+listenPacketButton = ttk.Button(mainframe, text='Listen for Packet', command=sendServerPacket)
+listenPacketButton.grid(column=4, row=5, sticky=E)
 
 # Log
 
@@ -279,7 +324,7 @@ logFrame.pack()
 for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
 
 ipEntryTextBox4.focus()
-root.bind('<Return>', sendOnePacket)
+root.bind('<Return>', sendServerPacket)
 
 root.mainloop()
 
