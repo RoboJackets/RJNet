@@ -1,33 +1,32 @@
 
 /*
- * Example of Arduino board using RJNet for ethernet TCP.
- * This also uses RJNet for serial communication.
- * created 20 Mar 2019
- * by Brian Cochran
+ * Two Arduino boards each with a server and a client connecting to the other's server
+ * This uses RJNet
+ * Modified 9 Feb 2020
+ * by Brian Cochran and Peter Wilson
  * 
  */
 
 #include <Ethernet.h>
 #include "RJNet.h" //make sure to install the RJNet library
 
-// Enter a MAC address and IP address for your controller below.
-// The IP address will be dependent on your local network.
-// gateway and subnet are optional:
+const static int PORT = 7; //port RJNet uses
+
+//Don't forget to switch these around depending on which board you are programming!
+
+// Enter a MAC address and IP address for your board below
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; //the Wiznet 5500io chips have their own MAC, so use that
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 0, 177); //set the IP to find us at
-int PORT = 7; //port we use to connect
-
-
 EthernetServer server(PORT);
 
-//Computer 
-IPAddress computerIP(192, 168, 0, 2);
-EthernetClient computer;
+// Enter a IP address for other board below
+IPAddress otherIP(192, 168, 0, 178); //set the IP to find us at
+EthernetClient otherBoard;
+
  
 void setup() {
   Serial.begin(9600);
-  Serial.println("Beginning")
   
   // In case your RJ board wires the chip in an odd config,
   // otherwise, leave commented out
@@ -50,9 +49,8 @@ void setup() {
   // start listening for clients
   server.begin();
 
-  Serial.print("Chat server address:");
+  Serial.print("Our address: ");
   Serial.println(Ethernet.localIP());
-
 
   
 }
@@ -75,16 +73,23 @@ void loop() {
     }
   }
 
-  if (!computer.connected()) {
-    computer.connect(computerIP, 50848);
-    Serial.println("Trying to connect");
+  if(millis() - startTime >= 500){
+      startTime = millis();
+    if (!otherBoard.connected()) {
+      otherBoard.connect(otherIP, PORT);
+      Serial.print("Trying to connect to ");
+      Serial.print(otherIP);
+      Serial.print(":");
+      Serial.println(PORT);
+    }
+    else{
+      RJNet::sendData(otherBoard, "Ping");
+      Serial.print("Sending data to ");
+      Serial.print(otherBoard.remoteIP());
+      Serial.print(":");
+      Serial.println(otherBoard.remotePort());
+      
+    }
   }
-  else{
-    RJNet::sendData(computer, "Ping");
-    Serial.println("Sending data");
-  }
-  delay(20);
-
-  
 
 }
