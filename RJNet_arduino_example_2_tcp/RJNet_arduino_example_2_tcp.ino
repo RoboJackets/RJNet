@@ -9,6 +9,7 @@
 
 #include <Ethernet.h>
 #include "RJNet.h" //make sure to install the RJNet library
+#include <w5100.h>
 
 const static int PORT = 7; //port RJNet uses
 
@@ -93,3 +94,14 @@ void loop() {
   }
 
 }
+
+
+
+void configureSIR(){
+    W5100::write(0x0017, 0xFF);
+}
+
+void configureSn_IMR(){
+    W5100::write(0x002C, 0xE4);
+}
+    
