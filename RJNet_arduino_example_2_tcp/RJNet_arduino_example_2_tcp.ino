@@ -16,14 +16,13 @@ const static int PORT = 7; //port RJNet uses
 
 // Enter a MAC address and IP address for your board below
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 0, 177); //set the IP to find us at
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE };
+IPAddress ip(192, 168, 0, 178); //set the IP to find us at
 EthernetServer server(PORT);
 
 // Enter a IP address for other board below
-IPAddress otherIP(192, 168, 0, 178); //set the IP to find us at
+IPAddress otherIP(192, 168, 0, 177); //set the IP to find us at
 EthernetClient otherBoard;
-
  
 void setup() {
   Serial.begin(9600);
@@ -35,6 +34,8 @@ void setup() {
 
   // initialize the ethernet device
   Ethernet.begin(mac, ip);
+
+  Ethernet.setSubnetMask(
 
   //check that ethernet equipment is plugged in
   while (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -67,14 +68,18 @@ void loop() {
       Serial.print(client.remoteIP());
       Serial.print(":");
       Serial.println(client.remotePort());
+
+      Serial.println(millis());
       
       //do something useful with data here, maybe reply
       RJNet::sendData(client, "Message Received");
+      
     }
+    else Serial.print(" Empty message recieved. ");
   }
-
-  if(millis() - startTime >= 500){
-      startTime = millis();
+  
+  // if(millis() - startTime >= 500){
+  //     startTime = millis();
     if (!otherBoard.connected()) {
       otherBoard.connect(otherIP, PORT);
       Serial.print("Trying to connect to ");
@@ -88,8 +93,7 @@ void loop() {
       Serial.print(otherBoard.remoteIP());
       Serial.print(":");
       Serial.println(otherBoard.remotePort());
-      
     }
-  }
+  // }
 
 }
