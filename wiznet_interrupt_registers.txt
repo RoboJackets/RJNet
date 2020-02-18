@@ -1,0 +1,11 @@
+https://cdn.sparkfun.com/datasheets/Dev/Arduino/Shields/W5500_datasheet_v1.0.2_1.pdf
+Register Notation : [Read/Write] [Address] [Reset value] - page number.
+
+IR (Interrupt Register) [R/W] [0x0015] [0x00] - p35: Interrupts from random sources we don't care about.
+IMR(Interrupt Mask Register)[R/W][0x0016][0x00] - p36: Mask for IR. If the bit is 1, the corresponding bit of the IR can cause interrupts.
+
+SIR(Socket Interrupt Register)[R/W][0x0017][0x00] - p37: Indicates which socket caused the interrupt. If any bits are 1, INTn asserted low. Must be cleared by host.
+SIMR (Socket Interrupt Mask Register) [R/W] [0x0018] [0x00] - p38: Mask register for SIR. If a bit is 1, that socket causes interrupts.
+
+Sn_IR (Socketn Interrupt Register) [R] [0x0002] [0x00] - p48: Bits indicate WHAT caused the interrupt (2 is recieve). Write a 1 to that position to clear it. There appears to be only 1 register for every socket - I think this register indicates what, and SIR indicates why (based on no data).
+Sn_IMR (Socketn Interrupt Mask Register)[R/W][0x002C][0xFF] - p57: Mask for Sn_IR. If the bit is 1, the corresponding bit of the Sn_IR can cause interrupts.
