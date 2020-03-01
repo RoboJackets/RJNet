@@ -1,4 +1,3 @@
-
 /*
  * Two Arduino boards each with a server and a client connecting to the other's server
  * This uses RJNet
@@ -16,16 +15,16 @@ const static int PORT = 7; //port RJNet uses
 
 // Enter a MAC address and IP address for your board below
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE };
-IPAddress ip(192, 168, 0, 178); //set the IP to find us at
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xE1 };
+IPAddress ip(192, 168, 0, 171); //set the IP to find us at
 EthernetServer server(PORT);
 
 // Enter a IP address for other board below
-IPAddress otherIP(192, 168, 0, 177); //set the IP to find us at
+IPAddress otherIP(192, 168, 0, 175); //set the IP to find us at
 EthernetClient otherBoard;
  
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   // In case your RJ board wires the chip in an odd config,
   // otherwise, leave commented out
@@ -35,7 +34,7 @@ void setup() {
   // initialize the ethernet device
   Ethernet.begin(mac, ip);
 
-  Ethernet.setSubnetMask(
+  //Ethernet.setSubnetMask(
 
   //check that ethernet equipment is plugged in
   while (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -64,12 +63,10 @@ void loop() {
     String data = RJNet::readData(client);
     if (data.length() != 0) {
       Serial.print(data); //show us what we read 
-      Serial.print(" From ");
+      Serial.print(" From client ");
       Serial.print(client.remoteIP());
       Serial.print(":");
       Serial.println(client.remotePort());
-
-      Serial.println(millis());
       
       //do something useful with data here, maybe reply
       RJNet::sendData(client, "Message Received");
@@ -78,8 +75,11 @@ void loop() {
     else Serial.print(" Empty message recieved. ");
   }
   
-  // if(millis() - startTime >= 500){
-  //     startTime = millis();
+  //Connect to otherBoard's server (WE are the client)
+  if(millis() - startTime >= 500){
+    Serial.println("");
+    //Dont' spam server with messages
+    startTime = millis();
     if (!otherBoard.connected()) {
       otherBoard.connect(otherIP, PORT);
       Serial.print("Trying to connect to ");
@@ -88,12 +88,22 @@ void loop() {
       Serial.println(PORT);
     }
     else{
-      RJNet::sendData(otherBoard, "Ping");
+      RJNet::sendData(otherBoard, "Hi have important data!");
       Serial.print("Sending data to ");
       Serial.print(otherBoard.remoteIP());
       Serial.print(":");
       Serial.println(otherBoard.remotePort());
     }
-  // }
+  }
+  
+  if(otherBoard.available()){
+    //Server sent us a message
+    String serversMessage = RJNet::readData(otherBoard);
+    Serial.print(serversMessage); //show us what we read 
+    Serial.print(" To us from server ");
+    Serial.print(otherBoard.remoteIP());
+    Serial.print(":");
+    Serial.println(otherBoard.remotePort());
+  }
 
 }
