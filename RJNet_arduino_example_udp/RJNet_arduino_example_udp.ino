@@ -8,7 +8,7 @@
  */
 
 #include <Ethernet.h>
-#include "RJNet.h" //make sure to install the RJNet library
+#include "RJNetUDP.h" //make sure to install the RJNet library
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network.
@@ -16,18 +16,16 @@
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; //the Wiznet 5500io chips have their own MAC, so use that
 IPAddress ip(192, 168, 0, 177); //set the IP to find us at
-int PORT = 7; //port we use to connect
 
 
-EthernetServer server(PORT);
+EthernetUDP UDP;
 
 //Computer 
 IPAddress computerIP(192, 168, 0, 2);
-EthernetClient computer;
  
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Beginning")
+  Serial.begin(115200);
+  Serial.println("Beginning");
   
   // In case your RJ board wires the chip in an odd config,
   // otherwise, leave commented out
@@ -48,42 +46,33 @@ void setup() {
   }
 
   // start listening for clients
-  server.begin();
+  UDP.begin(RJNet::RJNET_PORT);
 
-  Serial.print("Chat server address:");
+  Serial.print("Our address:");
   Serial.println(Ethernet.localIP());
 
 
   
 }
 double counter = 0;
-long int startTime = 0;
+unsigned long startTime = 0;
 void loop() {
-  // wait for a new client:
-  EthernetClient client = server.available();
-  if (client) {
-    String data = RJNet::readData(client);
-    if (data.length() != 0) {
-      Serial.print(data); //show us what we read 
-      Serial.print(" From ");
-      Serial.print(client.remoteIP());
-      Serial.print(":");
-      Serial.println(client.remotePort());
-      
-      //do something useful with data here, maybe reply
-      RJNet::sendData(client, "Message Received");
+    //Check if there is a new message
+    UDP_message message = RJNet::readData(UDP);
+    if (message.valid) {
+        //If we got a new message print it out
+        Serial.print(message.data); //show us what we read 
+        Serial.print(" From ");
+        Serial.print(message.remote_ip);
+        Serial.print(":");
+        Serial.println(message.remote_port);
     }
-  }
 
-  if (!computer.connected()) {
-    computer.connect(computerIP, 50848);
-    Serial.println("Trying to connect");
-  }
-  else{
-    RJNet::sendData(computer, "Ping");
-    Serial.println("Sending data");
-  }
-  delay(20);
+    if(millis() - startTime >= 500){
+        RJNet::sendData(UDP, "Ping", computerIP);
+        Serial.println("Sending data");
+    }
+    delay(1);
 
   
 
