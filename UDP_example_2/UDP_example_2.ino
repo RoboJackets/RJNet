@@ -1,18 +1,3 @@
-/*
- UDPSendReceiveString:
- This sketch receives UDP message strings, prints them to the serial port
- and sends an "acknowledge" string back to the sender
-
- A Processing sketch is included at the end of file that can be used to send
- and received messages for testing with a computer.
-
- created 21 Aug 2010
- by Michael Margolis
-
- This code is in the public domain.
- */
-
-
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include "RJNetUDP.h"
@@ -65,54 +50,8 @@ void setup() {
 void loop() {
   // if there's data available, read a packet
   String message = RJNetUDP::receiveMessage(Udp);
-  if(message.charAt(0).isalpha()) {
-    Serial.print(message);
-  }
-  else {
-    Serial.print(message.toFloat());
-  }
+  Serial.print(message);
 
-  RJNetUDP::sendMessage("hi", Udp, ip, otherip);
-  RJNetUDP::sendMessage(0.495869, Udp, ip, otherip);
+  RJNetUDP::sendMessage(String("hi"), Udp, otherip);
+  RJNetUDP::sendMessage(0.495869, Udp, otherip);
 }
-
-
-/*
-  Processing sketch to run with this example
- =====================================================
-
- // Processing UDP example to send and receive string data from Arduino
- // press any key to send the "Hello Arduino" message
-
-
- import hypermedia.net.*;
-
- UDP udp;  // define the UDP object
-
-
- void setup() {
- udp = new UDP( this, 6000 );  // create a new datagram connection on port 6000
- //udp.log( true ); 		// <-- printout the connection activity
- udp.listen( true );           // and wait for incoming message
- }
-
- void draw()
- {
- }
-
- void keyPressed() {
- String ip       = "192.168.1.177";	// the remote IP address
- int port        = 8888;		// the destination port
-
- udp.send("Hello World", ip, port );   // the message to send
-
- }
-
- void receive( byte[] data ) { 			// <-- default handler
- //void receive( byte[] data, String ip, int port ) {	// <-- extended handler
-
- for(int i=0; i < data.length; i++)
- print(char(data[i]));
- println();
- }
- */
