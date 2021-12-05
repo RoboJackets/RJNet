@@ -5,11 +5,11 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF
 };
-//0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF
-IPAddress ip(192, 168, 20, 172);
-IPAddress otherip(192, 168, 20, 175);
+//0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+IPAddress ip(192, 168, 20, 175);
+IPAddress otherip(192, 168, 20, 4);
 unsigned int localPort = 8888;      // local port to listen on
 
 // An EthernetUDP instance to let us send and receive packets over UDP
@@ -49,7 +49,7 @@ void setup() {
   Udp.begin(localPort);
 
 }
-
+unsigned long start_time = 0;
 void loop() {
   // if there's data available, read a packet
   Message message1 = RJNetUDP::receiveMessage(Udp);
@@ -58,6 +58,10 @@ void loop() {
     Serial.println(message1.ipaddress);
     Serial.println(message1.message);    
   }
-  RJNetUDP::sendMessage("hiiheoifjsoifejosijfoj", Udp, otherip);
-  RJNetUDP::sendMessage(0.475823123, Udp, otherip);
+  if(millis() - start_time >= 50) {
+    RJNetUDP::sendMessage("hiiheoifjsoifejosijfoj", Udp, otherip);
+    RJNetUDP::sendMessage(0.475823123, Udp, otherip);
+    start_time = millis();
+  }
+
 }
