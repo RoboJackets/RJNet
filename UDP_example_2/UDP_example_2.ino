@@ -8,8 +8,8 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 //0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF
-IPAddress ip(192, 168, 0, 172);
-IPAddress otherip(192, 168, 0, 175);
+IPAddress ip(192, 168, 20, 172);
+IPAddress otherip(192, 168, 20, 175);
 unsigned int localPort = 8888;      // local port to listen on
 
 // An EthernetUDP instance to let us send and receive packets over UDP
