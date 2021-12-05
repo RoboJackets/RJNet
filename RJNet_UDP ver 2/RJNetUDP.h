@@ -5,6 +5,12 @@
 #include <EthernetUdp.h> 
 #include <Arduino.h>
 
+struct Message {
+  bool received;
+  String message;
+  IPAddress ipaddress;
+};
+
 //Function that sends message to certain IP 
 //Function that recieves UDP message if available 
 
@@ -14,7 +20,7 @@ class RJNetUDP
         RJNet();
         static void sendMessage(String message, EthernetUDP &Udp, IPAddress &remoteIP);
         static void sendMessage(float num, EthernetUDP &Udp, IPAddress &remoteIP);
-        static String receiveMessage(EthernetUDP &Udp);
+        static Message receiveMessage(EthernetUDP &Udp);
         const static unsigned int RJNET_PORT;
 };
 

@@ -7,6 +7,7 @@
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
+//0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF
 IPAddress ip(192, 168, 0, 172);
 IPAddress otherip(192, 168, 0, 175);
 unsigned int localPort = 8888;      // local port to listen on
@@ -14,6 +15,7 @@ unsigned int localPort = 8888;      // local port to listen on
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
 
+float test = 5.0492;
 void setup() {
   // You can use Ethernet.init(pin) to configure the CS pin
   //Ethernet.init(10);  // Most Arduino shields
@@ -45,13 +47,17 @@ void setup() {
 
   // start UDP
   Udp.begin(localPort);
+
 }
 
 void loop() {
   // if there's data available, read a packet
-  String message = RJNetUDP::receiveMessage(Udp);
-  Serial.print(message);
-
-  RJNetUDP::sendMessage(String("hi"), Udp, otherip);
-  RJNetUDP::sendMessage(0.495869, Udp, otherip);
+  Message message1 = RJNetUDP::receiveMessage(Udp);
+  if(message1.received) {
+    Serial.print("Message from IP: ");
+    Serial.println(message1.ipaddress);
+    Serial.println(message1.message);    
+  }
+  RJNetUDP::sendMessage("hiiheoifjsoifejosijfoj", Udp, otherip);
+  RJNetUDP::sendMessage(0.475823123, Udp, otherip);
 }
