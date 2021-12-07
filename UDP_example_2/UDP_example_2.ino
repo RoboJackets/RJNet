@@ -10,6 +10,7 @@ byte mac[] = {
 //0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 IPAddress ip(192, 168, 20, 175);
 IPAddress otherip(192, 168, 20, 4);
+//IPAddress otherip(192, 168, 20, 255);  //Send to .255 to multicast the packet
 unsigned int localPort = 8888;      // local port to listen on
 
 // An EthernetUDP instance to let us send and receive packets over UDP
@@ -27,12 +28,13 @@ void setup() {
 
   // start the Ethernet
   Ethernet.begin(mac, ip);
+  //If you don't set retransmission to 0, the WIZNET will retry 8 times if it cannot resolve the
+  //MAC address of the destination using ARP and block for a long time.
+  //With this as 0, will only block for ~200ms
+  Ethernet.setRetransmissionCount(0);
 
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
 
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {

@@ -1,23 +1,27 @@
 #ifndef RJNetUDP_h
 #define RJNetUDP_h
 
+#include <Ethernet.h> 
+#include <EthernetUdp.h> 
 #include <Arduino.h>
-#include <Ethernet.h>
-#include <EthernetUDP.h>
 
-struct UDP_message {
-    bool valid;   //If this is false, we didn't get a message. All other fields are invalid.
-    IPAddress remote_ip;
-    uint16_t remote_port;
-    String data;
+struct Message {
+  bool received;
+  String message;
+  IPAddress ipaddress;
 };
 
-class RJNet {
+//Function that sends message to certain IP 
+//Function that recieves UDP message if available 
+
+class RJNetUDP 
+{
     public:
         RJNet();
-        static void sendData(EthernetUDP &, const String &, const IPAddress &);
-        static UDP_message readData(EthernetUDP &);
-        const static uint16_t RJNET_PORT;
+        static void sendMessage(String message, EthernetUDP &Udp, IPAddress &remoteIP);
+        static void sendMessage(float num, EthernetUDP &Udp, IPAddress &remoteIP);
+        static Message receiveMessage(EthernetUDP &Udp);
+        const static unsigned int RJNET_PORT;
 };
 
 
