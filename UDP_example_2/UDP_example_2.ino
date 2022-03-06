@@ -8,8 +8,8 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF
 };
 //0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-IPAddress ip(192, 168, 20, 175);
-IPAddress otherip(192, 168, 20, 4);
+const IPAddress ip(192, 168, 20, 175);
+const IPAddress otherip(192, 168, 20, 4);
 //IPAddress otherip(192, 168, 20, 255);  //Send to .255 to multicast the packet
 unsigned int localPort = 8888;      // local port to listen on
 

@@ -15,14 +15,14 @@ Message RJNetUDP::receiveMessage(EthernetUDP &Udp)
     return {false};
 }
 
-void RJNetUDP::sendMessage(String message, EthernetUDP &Udp, IPAddress &remoteIP) 
+void RJNetUDP::sendMessage(String message, EthernetUDP &Udp, const IPAddress &remoteIP) 
 {
     Udp.beginPacket(remoteIP, RJNET_PORT);
     Udp.write(message.c_str(), message.length());
     Udp.endPacket();
 }
 
-void RJNetUDP::sendMessage(float num, EthernetUDP &Udp, IPAddress &remoteIP) 
+void RJNetUDP::sendMessage(float num, EthernetUDP &Udp, const IPAddress &remoteIP) 
 {
     Udp.beginPacket(remoteIP, RJNET_PORT);
     Udp.write(String(num, 5).c_str());  //rounding float to 5 decimal places

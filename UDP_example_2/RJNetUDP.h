@@ -18,8 +18,8 @@ class RJNetUDP
 {
     public:
         RJNet();
-        static void sendMessage(String message, EthernetUDP &Udp, IPAddress &remoteIP);
-        static void sendMessage(float num, EthernetUDP &Udp, IPAddress &remoteIP);
+        static void sendMessage(String message, EthernetUDP &Udp, const IPAddress &remoteIP);
+        static void sendMessage(float num, EthernetUDP &Udp, const IPAddress &remoteIP);
         static Message receiveMessage(EthernetUDP &Udp);
         const static unsigned int RJNET_PORT;
 };
