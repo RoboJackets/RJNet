@@ -1,7 +1,5 @@
 #include "RJNetUDP.h"
 
-void RJNetUDP() {}
-
 const unsigned int RJNetUDP::RJNET_PORT = 8888;
 Message RJNetUDP::receiveMessage(EthernetUDP &Udp)
 {
@@ -15,14 +13,19 @@ Message RJNetUDP::receiveMessage(EthernetUDP &Udp)
     return {false};
 }
 
-void RJNetUDP::sendMessage(String message, EthernetUDP &Udp, IPAddress &remoteIP) 
+void RJNetUDP::sendMessage(const String &message, EthernetUDP &Udp, const IPAddress &remoteIP) 
+{
+    sendMessage(message.c_str(), Udp, remoteIP);
+}
+
+void RJNetUDP::sendMessage(const char message[], EthernetUDP &Udp, const IPAddress &remoteIP) 
 {
     Udp.beginPacket(remoteIP, RJNET_PORT);
-    Udp.write(message.c_str(), message.length());
+    Udp.write(message);
     Udp.endPacket();
 }
 
-void RJNetUDP::sendMessage(float num, EthernetUDP &Udp, IPAddress &remoteIP) 
+void RJNetUDP::sendMessage(float num, EthernetUDP &Udp, const IPAddress &remoteIP) 
 {
     Udp.beginPacket(remoteIP, RJNET_PORT);
     Udp.write(String(num, 5).c_str());  //rounding float to 5 decimal places
